@@ -1,60 +1,60 @@
 let s:plugin_path = expand("<sfile>:p:h:h")
-let s:default_command = "rspec {spec}"
+let s:default_command = "bundle exec cucumber {spec}"
 let s:force_gui = 0
 
-if !exists("g:rspec_runner")
-  let g:rspec_runner = "os_x_terminal"
+if !exists("g:cucumber_runner")
+  let g:cucumber_runner = "os_x_terminal"
 endif
 
-function! RunAllSpecs()
+function! RunCucumberAllSpecs()
   let s:last_spec = ""
-  call s:RunSpecs(s:last_spec)
+  call s:RunCucumberSpecs(s:last_spec)
 endfunction
 
-function! RunCurrentSpecFile()
+function! RunCucumberCurrentSpecFile()
   if s:InSpecFile()
     let s:last_spec_file = s:CurrentFilePath()
     let s:last_spec = s:last_spec_file
-    call s:RunSpecs(s:last_spec_file)
+    call s:RunCucumberSpecs(s:last_spec_file)
   elseif exists("s:last_spec_file")
-    call s:RunSpecs(s:last_spec_file)
+    call s:RunCucumberSpecs(s:last_spec_file)
   endif
 endfunction
 
-function! RunNearestSpec()
+function! RunCucumberNearestSpec()
   if s:InSpecFile()
     let s:last_spec_file = s:CurrentFilePath()
     let s:last_spec_file_with_line = s:last_spec_file . ":" . line(".")
     let s:last_spec = s:last_spec_file_with_line
-    call s:RunSpecs(s:last_spec_file_with_line)
+    call s:RunCucumberSpecs(s:last_spec_file_with_line)
   elseif exists("s:last_spec_file_with_line")
-    call s:RunSpecs(s:last_spec_file_with_line)
+    call s:RunCucumberSpecs(s:last_spec_file_with_line)
   endif
 endfunction
 
-function! RunLastSpec()
+function! RunCucumberLastSpec()
   if exists("s:last_spec")
-    call s:RunSpecs(s:last_spec)
+    call s:RunCucumberSpecs(s:last_spec)
   endif
 endfunction
 
 " === local functions ===
 
-function! s:RunSpecs(spec_location)
-  let s:rspec_command = substitute(s:RspecCommand(), "{spec}", a:spec_location, "g")
+function! s:RunCucumberSpecs(spec_location)
+  let s:cucumber_command = substitute(s:CucumberCommand(), "{spec}", a:spec_location, "g")
 
-  execute s:rspec_command
+  execute s:cucumber_command
 endfunction
 
 function! s:InSpecFile()
-  return match(expand("%"), "_spec.rb$") != -1
+  return (match(expand("%"), ".feature$") != -1)
 endfunction
 
-function! s:RspecCommand()
-  if s:RspecCommandProvided() && s:IsMacGui()
-    let l:command = s:GuiCommand(g:rspec_command)
-  elseif s:RspecCommandProvided()
-    let l:command = g:rspec_command
+function! s:CucumberCommand()
+  if s:CucumberCommandProvided() && s:IsMacGui()
+    let l:command = s:GuiCommand(g:cucumber_command)
+  elseif s:CucumberCommandProvided()
+    let l:command = g:cucumber_command
   elseif s:IsMacGui()
     let l:command = s:GuiCommand(s:default_command)
   else
@@ -64,8 +64,8 @@ function! s:RspecCommand()
   return l:command
 endfunction
 
-function! s:RspecCommandProvided()
-  return exists("g:rspec_command")
+function! s:CucumberCommandProvided()
+  return exists("g:cucumber_command")
 endfunction
 
 function! s:DefaultTerminalCommand()
@@ -77,7 +77,7 @@ function! s:CurrentFilePath()
 endfunction
 
 function! s:GuiCommand(command)
-  return "silent ! '" . s:plugin_path . "/bin/" . g:rspec_runner . "' '" . a:command . "'"
+  return "silent ! '" . s:plugin_path . "/bin/" . g:cucumber_runner . "' '" . a:command . "'"
 endfunction
 
 function! s:ClearCommand()
@@ -97,11 +97,11 @@ function! s:IsWindows()
 endfunction
 
 " begin vspec config
-function! rspec#scope()
+function! vim_cucumber#scope()
   return s:
 endfunction
 
-function! rspec#sid()
+function! vim_cucumber#sid()
     return maparg('<SID>', 'n')
 endfunction
 nnoremap <SID> <SID>
